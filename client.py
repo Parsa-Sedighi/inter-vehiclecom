@@ -1,17 +1,26 @@
 import socket
 
-# REPLACE with the Server's Local IP (e.g., '192.168.1.15')
-SERVER_IP = '192.168.0.250' 
+# Use the Ethernet IP we verified earlier
+SERVER_IP = '192.168.8.230' 
 PORT = 65432
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     try:
         s.connect((SERVER_IP, PORT))
-        # Receive the server's hello
-        data = s.recv(1024)
-        print(f"Received from server: {data.decode()}")
+        print(f"Connected to Jetson at {SERVER_IP}")
         
-        # Send a hello back
-        s.sendall(b"Hello from the Client!")
-    except ConnectionRefusedError:
-        print("Could not connect. Is the server running and the IP/Port correct?")
+        while True:
+            # 1. Send message to Jetson
+            message = input("Your message (Mac): ")
+            if message.lower() == 'quit':
+                break
+            s.sendall(message.encode())
+            
+            # 2. Receive reply from Jetson
+            data = s.recv(1024)
+            print(f"Jetson says: {data.decode()}")
+            
+    except Exception as e:
+        print(f"Connection error: {e}")
+
+print("Connection closed.")
